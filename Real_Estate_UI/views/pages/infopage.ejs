@@ -1,0 +1,222 @@
+
+<link rel="stylesheet" href="/styles/importer.css">
+<link href="https://fonts.googleapis.com/css?family=Raleway:300,400" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<div class="container">
+    <!-- Bootstrap Documentation: https://getbootstrap.com/docs/4.0/components/navbar/ -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="#">Client Information Page</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav">
+              <li id="reqAp" class="active">
+                <a class="nav-link" onclick="loadRequestAppraisalList()">Request Appraisal</a>
+              </li>
+              <li id="evAp" class="">
+                <a class="nav-link" onclick="loadEvaluatedAppraisalList()">Appraisal Status</a>
+              </li>
+             
+          </ul>
+          
+        <ul class="navbar-nav mr-auto">
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Logout</a>
+          </li>
+          
+        </ul>
+  
+  
+      </div>
+    </nav>
+  
+  </div>
+  <br><br><br>
+  <div class="row">
+  <div class="container">
+      <div id='reqForm'>
+          <div id="login">
+
+              <div class="container">
+                <h1 class="text-center">Request Appraisal</h1>
+                <h4 class="text-center" style="color:green" id="subMsg"></h4>
+                <hr/>
+                <div class="row">
+                    <div class="col-lg-3"></div>
+                  <div class="col-lg-6">
+                  <form id="frmRequestQuote">
+                    <div class="form-group">
+                      <input type="number" class="form-control" id="MsID" placeholder="MsID *" required="true">
+              
+                    </div>
+                    <div class="form-group">
+                      <input type="number" class="form-control" id="MortID" placeholder="Mortage ID *" required="true">
+                      
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="FirstName" placeholder="First Name *" required="true">
+                        
+                      </div>
+                      <div class="form-group">
+                          <input type="text" class="form-control" id="LastName" placeholder="Last Name *" required="true">
+                          
+                        </div>
+                        <div class="form-group">
+                          <input type="email" class="form-control" id="email" placeholder="Email *" required="true">
+                          
+                        </div>
+                   
+                    <div class="form-group">
+                      <button type="submit" id="signIn"  class="btn-dark btn-lg btn-block">Request Evaluation<button>
+                    </div>
+                  </form>
+                </div>
+                <div class="col-lg-3"></div>
+                </div>
+              </div>
+            </div>
+
+      </div>
+      <div id='tableContent'>
+ 
+
+        </div>
+  </div>
+  
+  
+</div>
+
+<div id="validationModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="title"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="body"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+
+function checkSubmission()
+{
+  $.ajax({
+                type: "GET",
+                url: "https://realestatewebservice.herokuapp.com/AppraisalStatus",
+                dataType: "json",
+                contentType: "application/json",
+                crossDomain: true,
+                success: function (obj) {
+                  if(obj.length>0)
+                  {
+                    $("#title").html("Alert");
+                    $("#body").html("Request already submitted");
+                    $("#validationModal").modal('show');
+                    $('#MsID').prop('disabled', true);
+                    $('#MortID').prop('disabled', true);
+                    $('#FirstName').prop('disabled', true);
+                    $('#LastName').prop('disabled', true);
+                    $('#signIn').prop('disabled', true);
+                    $('#email').prop('disabled', true);
+                    $("#subMsg").html("(Request already Submitted)");
+                  }
+
+                }
+
+            });
+
+}
+checkSubmission();
+
+function loadRequestAppraisalList(){
+  $("#reqAp").attr("class", "active");
+  $("#evAp").attr("class", "");
+  $("#reqForm").show()
+  $("#tableContent").html(''); 
+}
+
+
+function loadEvaluatedAppraisalList(){
+  
+  $("#reqForm").hide()
+
+  $("#evAp").attr("class", "active");
+  $("#reqAp").attr("class", "");
+  
+  $("#tableContent").html(''); 
+          $.ajax({
+                type: "GET",
+                url: "https://realestatewebservice.herokuapp.com/AppraisalStatus",
+                dataType: "json",
+                contentType: "application/json",
+                crossDomain: true,
+                success: function (obj) {
+                  var strHtml = '<h1 class="text-center">Appraisal Status</h1><hr/><table class="table table-bordered"><tr><th>MsID</th><th>Mortage ID</th><th>First Name</th><th>Last Name</th><th>Appraisal Information ($ amount)</th><th>Status</th><th>Evaluated By</th></tr>';
+                  for(i=0;i<obj.length;i++)
+                  {
+                        if(obj[i].appraisalinfo==0)
+                        {
+                          obj[i].appraisalinfo="N/A";
+                        }
+                        if(obj[i].evaluatedBy=="")
+                        {
+                          obj[i].evaluatedBy="N/A";
+                        }
+                        strHtml = strHtml + '<tr><td>'+obj[i].msid+'</td><td>'+obj[i].mortid+'</td><td>'+obj[i].firstname+'</td><td>'+obj[i].lastname+'</td><td>'+obj[i].appraisalinfo+'</td><td>'+obj[i].status+'</td><td>'+obj[i].evaluatedBy+'</td><tr>';
+                   }
+                  strHtml = strHtml + "</html>";
+                  $("#tableContent").html(strHtml);  
+
+                }
+
+            });
+          }
+
+
+$("#frmRequestQuote").submit(function(e){
+  e.preventDefault();
+  if($('#frmRequestQuote')[0].checkValidity()){
+
+        $.ajax({
+                type: "POST",
+                url: "https://realestatewebservice.herokuapp.com/requestAppraisal",
+                dataType: "json",
+                data: JSON.stringify({ "email":$("#email").val(), "msid": $("#MsID").val() ,"mortid":$("#MortID").val(),"firstname":$("#FirstName").val(),"lastname":$("#LastName").val() }),
+                contentType: "application/json",
+                crossDomain: true,
+                success: function (obj) {
+                  $("#title").html("Success");
+                  $("#body").html("Successfully requested appraisal");
+                  $("#validationModal").modal('show');
+                  loadEvaluatedAppraisalList();
+
+                }
+
+            });
+  
+  }
+
+});
+
+    
+
+            
+
+</script>
+
+
+
+

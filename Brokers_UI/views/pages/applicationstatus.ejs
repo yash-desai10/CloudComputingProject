@@ -1,0 +1,135 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+
+<nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-4">
+  <a class="navbar-brand" href="/">Broker's Portal</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/">Logout <span class="sr-only">(current)</span> </a>
+      </li>
+     
+    </ul>
+  
+  </div>
+</nav>
+
+
+<form onsubmit="return applicationStatus()" action="javascript:void(0)" ;>
+  <fieldset>
+    <label>
+      <h2>Check Application Status</h2>
+    </label>
+
+    <div class="form-group row">
+
+      <div class="col-md-4 mb-3">
+        <label>Application Number</label>
+        <input type="number" class="form-control" id="appno" name="appno" placeholder="Enter your application number"
+          required>
+        <div class="invalid-feedback">
+        </div>
+      </div>
+    </div>
+
+    <div id="appstatus" style="color: green"></div>
+    <br>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <br>
+    <div id="datatable" class="tstyle">
+      <table class="table table-dark">
+          <thead>
+              <tr>
+              <th>Applicant Name</th>
+              <th>Mortgage ID</th>
+              <th>Application Status</th>
+              <th>House ID</th>
+              <th>Insured Amount</th>
+              <th>Deductible Amount</th>
+              </tr>
+          </thead>
+          <tbody id='tableBody'>
+          </tbody>
+      </table>
+    </div>
+  </fieldset>
+</form>
+
+<script type="text/javascript">
+
+  $(document).ready(function() {
+    var  token = sessionStorage.getItem("broker_token");
+       $.ajax({
+      type: "POST",
+      url: "https://brokerwebservice.herokuapp.com/chkAuth",
+      data: JSON.stringify({"token":token}),
+      dataType:"json",
+      contentType:"application/json",
+      crossDomain:true,
+      success: function(res){
+          if(res["response"] == "The user is not verified" ){
+          
+                   alert(res["response"]);
+                   window.location.pathname = "/";
+
+             
+          }
+      }
+    });
+
+    $("#datatable").hide()
+  });
+
+  function applicationStatus() {
+    var appno = document.getElementById("appno").value;
+    $.ajax({
+      type: "POST",
+      url: "https://brokerwebservice.herokuapp.com/getStatus",
+      data: JSON.stringify({"AppNo": appno}),
+      dataType: "json",
+      contentType: "application/json",
+      crossDomain: true,
+      async: false,
+      success: function (Broker) {
+
+        if(Broker["Message"] == "Wrong Application Number")
+        {
+          alert("Invalid Application Number");
+        } 
+        else 
+        {
+          $("#datatable").show()
+          if(Broker.insured_amount == 0)
+          {
+            var iamount="N/A";
+          } 
+          else 
+          {
+            iamount = Broker.insured_amount;  
+          }
+
+          if( Broker.deductible_amount == 0)
+          {
+            var damount = "N/A";
+          }
+          else 
+          {
+            damount = Broker.deductible_amount;
+          }
+            htmlRow = '<tr><td>'+Broker.emp_name+'</td><td>'+Broker.id+'</td><td>'+Broker.applicationStatus+'</td><td>'+Broker.house_id+'</td><td>'+iamount+'</td><td>'+damount+'</td>';
+                $("#tableBody").html(htmlRow);
+        }
+      }
+    });
+
+  }
+</script>

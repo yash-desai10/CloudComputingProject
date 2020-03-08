@@ -1,0 +1,112 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<div class="container">
+  <!-- Bootstrap Documentation: https://getbootstrap.com/docs/4.0/components/navbar/ -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">Real Estate Portal</a>
+    <div class="collapse navbar-collapse">
+    
+      <ul class="navbar-nav mr-auto">
+      </ul>
+      <ul class="navbar-nav">
+   
+        
+      </ul>
+
+
+    </div>
+  </nav>
+
+</div>
+<br><br><br>
+<br>
+
+
+<div id="login">
+  <div class="container">
+    <h1 class="text-center">Sign in to your account</h1>
+    <hr/>
+    <div class="row">
+        <div class="col-lg-3"></div>
+      <div class="col-lg-6">
+      <form>
+        <div class="form-group">
+          <input type="text" class="form-control" id="username" placeholder="Username" required="true">
+  
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" id="password" placeholder="Password" required="true">
+          
+        </div>
+       
+        <div class="form-group">
+          <button type="button" id="signIn"  class="btn-dark btn-lg btn-block">Sign in<button>
+        </div>
+      </form>
+    </div>
+    <div class="col-lg-3"></div>
+    </div>
+  </div>
+</div>
+
+<div id="validationModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Invalid Credentials</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>The username or password is invalid</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+$('#signIn').click(function(){
+
+            $.ajax({
+                type: "POST",
+                url: "https://realestatewebservice.herokuapp.com/login",
+                data: JSON.stringify({ "username": $("#username").val(),"password":$("#password").val() }),
+                dataType: "json",
+                contentType: "application/json",
+                crossDomain: true,
+                success: function (obj) {
+                  if(obj != undefined && obj.response != "Invalid Password")
+                  {
+                    if(obj[0].userType=="customer")
+                    {
+                      alert("Authorization Approved");
+                      window.location.href = window.location.origin+'/infopage';
+                    }
+                    else
+                    {
+                      alert("Authorization Approved");
+                        window.location.href = window.location.origin+'/AppraiserUI';
+                    }
+                  }
+                  else
+                  {
+                    $('#validationModal').modal('show');
+                  }
+                 
+                },
+                error:function(err){
+                      $('#validationModal').modal('show');
+                }
+
+            });
+});
+
+
+</script>
+

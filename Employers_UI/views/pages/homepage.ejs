@@ -1,0 +1,111 @@
+<head>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+    integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
+    crossorigin="anonymous"></script>
+
+  <script type=text/javascript> 
+    $(document).ready(function(){ 
+      $("#formAuth").submit(function(e){ 
+        e.preventDefault(); 
+        var checkdropdown=document.getElementById("droplist").value; 
+        if (checkdropdown=="" ) { 
+          //alert ("Please select Companyname!");
+                    $("#title").html("Validation Error");
+                    $("#body").html("Please Select a company name");
+                    $("#validationModal").modal('show'); 
+        return false; } 
+        $.ajax({ 
+          type: "POST" , 
+          url: "https://employerservice.herokuapp.com/auth", 
+          data: JSON.stringify({"EmployeeId": emp_id.value, "Password" : password.value,"CompanyName": $('#droplist').val()}),
+          dataType:"json", 
+          contentType:"application/json", 
+          crossDomain: true, 
+            success: function (authentication) {
+              if(authentication["Application Status"]=="Authoriztion approved" ) 
+                { debugger;
+                  console.log(authentication.token);
+                  alert(authentication["Application Status"]);
+                  sessionStorage.setItem("verification_token", authentication.token);
+                  sessionStorage.setItem("emp_id", emp_id.value);
+                  sessionStorage.setItem("company_name", $('#droplist').val()); window.location.replace("/formEmp"); } else{
+
+                    $("#title").html("Error");
+                    $("#body").html(authentication.Message);
+                    $("#validationModal").modal('show'); 
+                 
+                  
+                  } return false; console.log("Redirected"); } }); }); }); </script> </head> <body>
+
+                    
+  <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
+    <a class="navbar-brand" href="#">Employer's Portal</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+  
+  
+  <form data-toggle="validator" class="form" id="formAuth" name="formid">
+    <fieldset>
+      <h2>Log in</h2>
+      <div class="container-fluid">
+        <div class="content-area-right">
+          <div class="detail">
+            <div class="formdetails">
+              <input id="emp_id" name="emp_id" class="form-control" type="text" placeholder="Your employee id"
+              required="required" >
+            </div>
+            <div class="formdetails">
+              <input id="password" name="password" class="form-control" type="password" maxlength="8"
+                placeholder="Your password" required="required" >
+            </div>
+
+            <div class="formdetails">
+              
+                <select id="droplist" class="form-control" name="CompanyName" required="true">
+                  <div class="dropdown-menu">
+                    <option class="dropdown-header"  value="Employer">--Select Employer name--</option>
+                    <option class="dropdown-item"  value="Hp" href="#">HP</option>
+                    <option class="dropdown-item"  value="Amazon" href="#">Amazon</option>
+                    <option class="dropdown-item"  value="Apple" href="#">Apple</option>
+                  </div>
+                </select>
+             
+            </div> <br>
+            <button type="submit" class="btn btn-primary" style="font-size:16px; width:35%" class="btn btn-success btn-block">Log in</button>
+            
+           <br>
+            <div id="response_variable"></div>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+
+  <div id="validationModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="title"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="body"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>

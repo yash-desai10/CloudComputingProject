@@ -1,0 +1,257 @@
+<script type="text/javascript" src="//cdn.jsdelivr.net/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
+
+<script>
+   
+   $(document).ready(function(){
+       console.log("ready shehzeen");
+       var  token = sessionStorage.getItem("verification_token");
+       $.ajax({
+      type: "POST",
+      url: "https://employerservice.herokuapp.com/chkAuth",
+      data: JSON.stringify({"token":token}),
+      dataType:"json",
+      contentType:"application/json",
+      crossDomain:true,
+      success: function(res){
+          if(res["response"] == "The user is not verified" ){
+          
+                    $("#title").html("Error");
+                    $("#body").html(res.response);
+                    $("#validationModal").modal('show'); 
+                    window.location.pathname = "/";
+             
+          }
+      }
+    });
+
+    $("#formSendToBroker").submit(function (e) {
+        e.preventDefault();
+      if($('#formSendToBroker')[0].checkValidity()){  
+        sendInfotoBroker();
+      }
+        
+    });
+    
+
+ 
+
+   });
+
+function sendInfotoBroker() {
+
+var employeeId = sessionStorage.getItem("emp_id");
+var companyName = sessionStorage.getItem('company_name');
+var mortageNumber = $("#mortgage_number").val();
+var callBackURL = $("#callback_url").val();
+var salary = $("#salary").val();
+var employmentYears = $("#employment_years").val();
+var  token = sessionStorage.getItem("verification_token");
+
+var isValid = true;
+if(isNaN(mortageNumber) || mortageNumber=="")
+{
+    isValid=false;
+    
+}
+else if(isNaN(salary) || salary=="")
+{
+    isValid=false;
+    
+}
+else if(salary < 1)
+{
+    $("#title").html("Error");
+    $("#body").html("Salary Cannot be Zero or Less");
+    $("#validationModal").modal('show');   
+    isValid=false;
+
+}
+else if(isNaN(employmentYears) || employmentYears=="")
+{
+    isValid=false;
+    
+}
+else if(callBackURL!="https://prod-73.eastus.logic.azure.com/workflows/045dfb06a74f4403b66d426adc7b53d7/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2JIVVc72lYQ5t5qEuOgUJkvpKlJ5SLllHSpfYfZ5qhY")
+{
+    isValid=false;
+    $("#title").html("Error");
+    $("#body").html("Invalid Call Back URL");
+    $("#validationModal").modal('show');     
+}
+
+ if ($('#chkIsAgree').is(":checked"))
+{
+
+}
+else
+{
+
+    isValid=false;
+ 
+}
+
+if(isValid)
+{
+  $.ajax({
+      type: "POST",
+      url: "https://employerservice.herokuapp.com/consent",
+      data: JSON.stringify({"token":token,"EmployeeId":employeeId,"CompanyName":companyName, "MortageNumber":mortageNumber, "CallBackURL":callBackURL,"Salary":salary,"EmploymentYears":employmentYears}),
+      dataType:"json",
+      contentType:"application/json",
+      crossDomain:true,
+      success: function(obj){
+
+          //$("#response_variable").html("Your Information has successfully submitted to broker");
+if(obj.response == "success"){
+    $.ajax({
+      type: "POST",
+      url: obj.callback_url, // workflow url
+      data: JSON.stringify(obj),
+      dataType:"json",
+      contentType:"application/json",
+      crossDomain:true,
+      success: function(res){
+            if(res["response"]=="success")
+            {
+                    $("#title").html("Success");
+                    $("#body").html("Your Information has successfully submitted to broker");
+                    $("#validationModal").modal('show'); 
+
+            }
+            else if(res["response"] == "The user is not verified"){
+
+                    $("#title").html("Error");
+                    $("#body").html(res["response"]);
+                    $("#validationModal").modal('show'); 
+               
+                     window.location.pathname = "/";
+
+            }
+            else
+            {
+                    $("#title").html("Error");
+                    $("#body").html(res["response"]);
+                    $("#validationModal").modal('show'); 
+                 
+                    
+            }
+      }
+  });
+
+      }
+      else{
+                    $("#title").html("Error");
+                    $("#body").html(obj.response);
+                    $("#validationModal").modal('show'); 
+      }
+    }
+  });
+
+}
+  
+}
+
+
+
+   
+</script>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-4">
+        <a class="navbar-brand" href="/">Employeer's Portal</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Logout <span class="sr-only">(current)</span> </a>
+            </li>
+           
+          </ul>
+        
+        </div>
+      </nav>
+
+
+   
+
+
+
+
+<form class="form" id="formSendToBroker">
+    <fieldset>
+        <h2>Employee's detail</h2>    
+    <div class="container-fluid">
+        <div class="formdetails">
+            <p>
+                Mortgage Application number:
+            </p>
+            <input id="mortgage_number" name="mortgage_number" class="form-control" type="number" placeholder="Your mortgage application number" required="true"/>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="formdetails">
+            <p>
+                Broker URL:
+            </p>
+            <input id="callback_url" name="callback_url" class="form-control" type="url" placeholder="Enter Callback URL" required="true"/>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="formdetails">
+            <p>
+                Annual Salary (in K):
+            </p>
+            <input id="salary" name="salary" class="form-control" type="number" placeholder="Enter your annual salary" required="true"/>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="formdetails">
+            <p>
+                Employment length (in Years):
+            </p>
+            <input id="employment_years" name="employment_years" class="form-control" type="number" placeholder="Enter your Employment Years" required="true"/>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="form-group">
+        <div class="form-check" style="margin-top: 10px">
+        <input class="form-check-input is-valid" type="checkbox"  id="chkIsAgree" required="true">
+            <label class="form-check-label" style="margin-left: 20px" for="chkIsAgree">I Agree to send my details to MBR
+            </label>
+        </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <button class="btn btn-primary" id="btnSend" type="submit">Send Details to Broker</button>
+    </div>
+    <div id="response_variable"></div>
+</fieldset>
+</form>
+
+<div id="validationModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="title"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="body"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>

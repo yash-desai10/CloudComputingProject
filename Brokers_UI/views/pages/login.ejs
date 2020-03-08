@@ -1,0 +1,81 @@
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+      integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
+      crossorigin="anonymous"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.js"></script>
+  
+    <script type="text/javascript"
+      src="http://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/js/bootstrapValidator.min.js"> </script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"></script>
+    <script type=text/javascript> 
+      $(document).ready(function(){ 
+        $("#formAuth").submit(function(e){ 
+          e.preventDefault(); 
+         debugger;
+          $.ajax({ 
+            type: "POST" , 
+            url: "https://brokerwebservice.herokuapp.com/auth", 
+            data: JSON.stringify({"app_no": app_no.value, "password" : password.value }),
+            dataType:"json", 
+            contentType:"application/json", 
+            crossDomain: true, 
+              success: function (authentication) {
+                if(authentication["Message"]=="Authoriztion approved" ) 
+                  { 
+                    alert(authentication.Message);
+                    sessionStorage.setItem("broker_token", authentication.token);
+                    console.log(authentication.token);
+                    window.location.pathname = "/applicationstatus";
+                } else{
+                    alert(authentication.Message) } return false;  } }); }); }); </script> </head> <body>
+  
+                      
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
+      <a class="navbar-brand" href="#">Broker's Portal</a>
+      <ul class="navbar-nav mr-auto">
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Signup</a>
+        </li>
+        
+      </ul>
+    </nav>
+    
+    
+    <form data-toggle="validator" class="form" id="formAuth" name="formid">
+      <fieldset>
+        <h2>Log in</h2>
+        <div class="container-fluid">
+          <div class="content-area-right">
+            <div class="detail">
+              <div class="formdetails">
+                <input id="app_no" name="app_no" class="form-control" type="text" placeholder="Your Application Number"
+                required="required" >
+              </div>
+              <div class="formdetails">
+                <input id="password" name="password" class="form-control" type="password" maxlength="8"
+                  placeholder="Your Password" required="required" >
+              </div>
+              <button type="submit" class="btn btn-primary" style="font-size:16px; width:35%" class="btn btn-success btn-block">Log in</button>
+              
+             <br>
+              <div id="response_variable"></div>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+  </body>
